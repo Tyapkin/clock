@@ -1,16 +1,23 @@
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 export function useTheme() {
     const theme = ref(localStorage.getItem('theme') || 'system');
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = (newTheme) => {
         const root = document.documentElement;
-        const isDark = newTheme === 'dark' || (newTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const isDark = newTheme === 'dark' || (newTheme === 'system' && mediaQuery.matches);
 
         if (isDark) {
             root.classList.add('dark');
         } else {
             root.classList.remove('dark');
+        }
+    };
+
+    const handleSystemChange = () => {
+        if (theme.value === 'system') {
+            applyTheme('system');
         }
     };
 
@@ -21,12 +28,11 @@ export function useTheme() {
 
     onMounted(() => {
         applyTheme(theme.value);
+        mediaQuery.addEventListener('change', handleSystemChange);
+    });
 
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (theme.value === 'system') {
-                applyTheme('system');
-            }
-        });
+    onUnmounted(() => {
+        mediaQuery.removeEventListener('change', handleSystemChange);
     });
 
     return {
