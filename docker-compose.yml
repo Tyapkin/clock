@@ -1,0 +1,9 @@
+version: '3'
+services:
+  clock-app:
+    build: .
+    restart: always
+    ports:
+      # Слушаем только на localhost, порт 5678
+      # 3x-ui будет перенаправлять сюда "плохой" трафик (fallback)
+      - "127.0.0.1:5678:80"
